@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clasificación de Estilo Artístico</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        button {
+            margin: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Clasificación de Estilo Artístico</h1>
+    <p>Selecciona una opción:</p>
+
+    <div>
+        <button onclick="document.getElementById('fileInput').click()">Cargar Imagen</button>
+        <button onclick="startCamera()">Abrir Cámara</button>
+    </div>
+
+    <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileUpload(event)">
+
+    <div id="imageContainer">
+        <img id="previewImage" src="" alt="" style="display: none;">
+    </div>
+
+    <div id="result">
+        <h3 id="classification" style="display: none;"></h3>
+    </div>
+
+    <script>
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                const preview = document.getElementById('previewImage');
+                preview.src = URL.createObjectURL(file);
+                preview.style.display = 'block';
+
+                fetch('/classify_image', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const classification = document.getElementById('classification');
+                    classification.textContent = `Estilo detectado: ${data.label}`;
+                    classification.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+        }
+
+        function startCamera() {
+            fetch('/open_camera')
+                .then(response => response.json())
+                .then(data => {
+                    alert(`Estilo detectado: ${data.label}`);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+    </script>
+</body>
+</html>
